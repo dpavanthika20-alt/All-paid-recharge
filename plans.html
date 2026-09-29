@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recharge Plans — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html" class="active">Plans</a></li>
+      <li data-auth="in"><a href="transactions.html">Transactions</a></li>
+      <li data-auth="in"><a href="account.html">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="login.html" class="btn btn-ghost" data-auth="out" style="color:var(--text-on-dark-muted)">Log in</a>
+      <a href="dashboard.html" class="btn btn-outline btn-sm" data-auth="in" style="border-color:var(--line-dark);color:var(--text-on-dark)">Dashboard</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow">STEP 2 OF 3</div>
+    <h2>Choose a plan</h2>
+
+    <div class="filter-bar card">
+      <div class="field">
+        <label for="f-operator">Operator</label>
+        <select id="f-operator">
+          <option value="">All operators</option>
+          <option value="jio">Jio</option>
+          <option value="airtel">Airtel</option>
+          <option value="bsnl">BSNL</option>
+          <option value="vi">Vi</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-price">Max price</label>
+        <select id="f-price">
+          <option value="">Any price</option>
+          <option value="199">Under ₹199</option>
+          <option value="399">Under ₹399</option>
+          <option value="599">Under ₹599</option>
+          <option value="999">Under ₹999</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-sort">Sort by</label>
+        <select id="f-sort">
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="plans-grid" class="grid grid-3"></div>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+if(params.get('operator')) document.getElementById('f-operator').value = params.get('operator');
+
+const operatorMeta = Object.fromEntries(APR.operators.map(o => [o.id, o]));
+
+function render(){
+  const op = document.getElementById('f-operator').value;
+  const maxPrice = document.getElementById('f-price').value;
+  const sort = document.getElementById('f-sort').value;
+
+  let list = APR.plans.filter(p => !op || p.operator === op).filter(p => !maxPrice || p.amount <= Number(maxPrice));
+  list.sort((a,b) => sort === 'price-asc' ? a.amount - b.amount : b.amount - a.amount);
+
+  const grid = document.getElementById('plans-grid');
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div>No plans match those filters. Try widening your search.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(p => `
+    <div class="card card-hover plan-card">
+      <div class="flex-between">
+        <div class="operator-mark ${operatorMeta[p.operator].cls}" style="width:40px;height:40px;font-size:.8rem;margin:0">${operatorMeta[p.operator].initial}</div>
+        <span class="plan-tag">${p.validity}</span>
+      </div>
+      <div class="plan-price">₹${p.amount}</div>
+      <p class="mt-0" style="margin-bottom:0">${p.desc}</p>
+      <div class="plan-meta">
+        <span>📶 ${p.data}</span>
+        <span>📞 ${p.calls}</span>
+        <span>✉ ${p.sms}</span>
+      </div>
+      <button class="btn btn-primary btn-block" data-plan="${p.id}">Recharge now</button>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('[data-plan]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const plan = APR.plans.find(p => p.id === btn.dataset.plan);
+      const draft = JSON.parse(sessionStorage.getItem('apr-recharge-draft') || '{}');
+      sessionStorage.setItem('apr-recharge-draft', JSON.stringify({ ...draft, operator: plan.operator, amount: plan.amount, planId: plan.id }));
+      if(!APR.getSession()){
+        window.location.href = 'login.html?next=payment.html';
+      } else {
+        window.location.href = 'payment.html';
+      }
+    });
+  });
+}
+
+['f-operator','f-price','f-sort'].forEach(id => document.getElementById(id).addEventListener('change', render));
+render();
+</script>
+</body>
+</html>

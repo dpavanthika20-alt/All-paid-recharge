@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li><a href="transactions.html">Transactions</a></li>
+      <li><a href="account.html">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="#" class="btn btn-ghost" data-action="logout" style="color:var(--text-on-dark-muted)">Log out</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<div class="app-shell">
+  <aside class="app-sidebar">
+    <a href="dashboard.html" class="active">🏠 Dashboard</a>
+    <a href="recharge.html">📱 New recharge</a>
+    <a href="plans.html">📶 Browse plans</a>
+    <a href="transactions.html">🧾 Transactions</a>
+    <a href="account.html">👤 Account</a>
+    <a href="help.html">💬 Help</a>
+  </aside>
+
+  <main class="app-main">
+    <div class="flex-between" style="margin-bottom:22px">
+      <div>
+        <h2 style="margin-bottom:2px">Welcome back, <span data-user="name">there</span> 👋</h2>
+        <p class="mt-0">Here's what's happening with your account.</p>
+      </div>
+      <a href="recharge.html" class="btn btn-primary">+ New recharge</a>
+    </div>
+
+    <div class="grid grid-4" id="stat-cards"></div>
+
+    <div class="flex-between" style="margin-top:36px">
+      <h3>Recent transactions</h3>
+      <a href="transactions.html" class="btn btn-outline btn-sm">View all</a>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table id="recent-table">
+        <thead><tr><th>Transaction ID</th><th>Mobile</th><th>Operator</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+APR.requireAuth();
+const session = APR.getSession();
+const txns = APR.getTxns().filter(t => t.user === session.username).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+const total = txns.length;
+const success = txns.filter(t => t.status === 'Successful').length;
+const failed = txns.filter(t => t.status === 'Failed').length;
+const spend = txns.filter(t => t.status === 'Successful').reduce((s,t) => s + Number(t.amount), 0);
+
+document.getElementById('stat-cards').innerHTML = `
+  <div class="card stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total recharges</div></div>
+  <div class="card stat-card"><div class="stat-num" style="color:#0d9488">${success}</div><div class="stat-label">Successful</div></div>
+  <div class="card stat-card"><div class="stat-num" style="color:#d1293e">${failed}</div><div class="stat-label">Failed</div></div>
+  <div class="card stat-card"><div class="stat-num">₹${spend}</div><div class="stat-label">Total spent</div></div>
+`;
+
+const badgeClass = { Successful: 'badge-success', Pending: 'badge-pending', Failed: 'badge-failed' };
+const tbody = document.querySelector('#recent-table tbody');
+if(txns.length === 0){
+  tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">📭</div>No recharges yet. <a href="recharge.html" style="color:var(--teal)">Start one now</a>.</div></td></tr>`;
+} else {
+  tbody.innerHTML = txns.slice(0,5).map(t => `
+    <tr>
+      <td>${t.id}</td>
+      <td>${t.mobile}</td>
+      <td style="text-transform:capitalize">${t.operator}</td>
+      <td>₹${t.amount}</td>
+      <td><span class="badge ${badgeClass[t.status]}">${t.status}</span></td>
+    </tr>`).join('');
+}
+</script>
+</body>
+</html>

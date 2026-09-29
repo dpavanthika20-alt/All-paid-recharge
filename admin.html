@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge<span class="badge" style="margin-left:8px;background:rgba(124,108,240,.18);color:#a99bff">Admin</span></a>
+    <ul class="nav-links"><li><a href="index.html">Back to site</a></li></ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="#" class="btn btn-ghost" id="admin-logout" style="color:var(--text-on-dark-muted);display:none">Log out</a>
+    </div>
+  </div>
+</nav>
+
+<div id="admin-gate" class="auth-shell">
+  <div class="auth-card">
+    <div class="card">
+      <h2>Admin login</h2>
+      <p>Demo admin access — separate from user accounts.</p>
+      <form id="admin-login-form" novalidate>
+        <div class="field">
+          <label for="admin-user">Admin username</label>
+          <input type="text" id="admin-user" placeholder="admin">
+        </div>
+        <div class="field">
+          <label for="admin-pass">Admin password</label>
+          <input type="password" id="admin-pass" placeholder="admin123">
+          <div class="error">Incorrect admin credentials.</div>
+        </div>
+        <button type="submit" class="btn btn-dark btn-block">Log in as admin</button>
+      </form>
+      <p class="hint center" style="margin-top:14px">Demo credentials — <strong>admin</strong> / <strong>admin123</strong></p>
+    </div>
+  </div>
+</div>
+
+<main class="app-main wrap" id="admin-panel" style="display:none;padding-top:34px">
+  <h2>Admin dashboard</h2>
+  <p class="mt-0">Aggregated demo data across all local accounts and transactions.</p>
+
+  <div class="grid grid-4" id="admin-stats" style="margin-bottom:36px"></div>
+
+  <div class="grid grid-2" style="align-items:start">
+    <div>
+      <h3>User management</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Username</th><th>Mobile</th><th>Joined</th></tr></thead>
+          <tbody id="users-table"></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h3>Transaction management</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody id="admin-txn-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/script.js"></script>
+<script>
+APR.init();
+
+const gate = document.getElementById('admin-gate');
+const panel = document.getElementById('admin-panel');
+const logoutBtn = document.getElementById('admin-logout');
+
+function showPanel(){
+  gate.style.display = 'none';
+  panel.style.display = 'block';
+  logoutBtn.style.display = '';
+  renderAdmin();
+}
+
+if(sessionStorage.getItem('apr-admin') === 'true') showPanel();
+
+document.getElementById('admin-login-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const passField = document.getElementById('admin-pass').closest('.field');
+  const user = document.getElementById('admin-user').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  if(user === 'admin' && pass === 'admin123'){
+    APR.clearError(passField);
+    sessionStorage.setItem('apr-admin', 'true');
+    showPanel();
+  } else {
+    APR.showError(passField, 'Incorrect admin credentials.');
+  }
+});
+
+logoutBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  sessionStorage.removeItem('apr-admin');
+  window.location.reload();
+});
+
+function renderAdmin(){
+  const users = APR.getUsers();
+  const txns = APR.getTxns();
+  const success = txns.filter(t => t.status === 'Successful');
+  const failed = txns.filter(t => t.status === 'Failed');
+  const totalValue = success.reduce((s,t) => s + Number(t.amount), 0);
+
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="card stat-card"><div class="stat-num">${users.length}</div><div class="stat-label">Total users</div></div>
+    <div class="card stat-card"><div class="stat-num">${txns.length}</div><div class="stat-label">Total transactions</div></div>
+    <div class="card stat-card"><div class="stat-num" style="color:#0d9488">${success.length}</div><div class="stat-label">Successful</div></div>
+    <div class="card stat-card"><div class="stat-num">₹${totalValue}</div><div class="stat-label">Total recharge value</div></div>
+  `;
+
+  document.getElementById('users-table').innerHTML = users.length ? users.map(u => `
+    <tr><td>${u.name}</td><td>${u.username}</td><td>${u.mobile}</td><td>${u.createdAt}</td></tr>
+  `).join('') : `<tr><td colspan="4"><div class="empty-state">No users yet.</div></td></tr>`;
+
+  const badgeClass = { Successful: 'badge-success', Pending: 'badge-pending', Failed: 'badge-failed' };
+  document.getElementById('admin-txn-table').innerHTML = txns.length ? txns.slice().reverse().map(t => `
+    <tr><td>${t.id}</td><td>${t.user}</td><td>₹${t.amount}</td><td><span class="badge ${badgeClass[t.status]}">${t.status}</span></td></tr>
+  `).join('') : `<tr><td colspan="4"><div class="empty-state">No transactions yet.</div></td></tr>`;
+}
+</script>
+</body>
+</html>

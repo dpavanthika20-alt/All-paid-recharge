@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li data-auth="in"><a href="transactions.html">Transactions</a></li>
+      <li data-auth="in"><a href="account.html">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="dashboard.html" class="btn btn-outline btn-sm" data-auth="in" style="border-color:var(--line-dark);color:var(--text-on-dark)">Dashboard</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="wrap" style="max-width:760px">
+    <div class="eyebrow">STEP 3 OF 3</div>
+    <h2>Complete your payment</h2>
+    <ul class="steps"><li class="done">Details</li><li class="done">Choose plan</li><li class="active">Pay</li></ul>
+
+    <div class="grid grid-2" style="align-items:start">
+      <div class="card" id="summary-card"></div>
+
+      <div class="card">
+        <h3 style="margin-bottom:16px">Payment method</h3>
+        <div class="field">
+          <label for="method">Choose method</label>
+          <select id="method">
+            <option value="upi">UPI</option>
+            <option value="card">Debit / Credit Card</option>
+            <option value="netbanking">Net Banking</option>
+          </select>
+        </div>
+
+        <form id="pay-form" novalidate>
+          <div id="upi-fields">
+            <div class="field">
+              <label for="upi-id">UPI ID</label>
+              <input type="text" id="upi-id" placeholder="name@bank">
+              <div class="error">Enter a valid UPI ID (e.g. name@bank).</div>
+            </div>
+          </div>
+          <div id="card-fields" style="display:none">
+            <div class="field">
+              <label for="card-number">Card number</label>
+              <input type="text" id="card-number" placeholder="4111 1111 1111 1111" maxlength="19">
+              <div class="error">Enter a 16-digit demo card number.</div>
+            </div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label for="card-expiry">Expiry (MM/YY)</label>
+                <input type="text" id="card-expiry" placeholder="12/28" maxlength="5">
+                <div class="error">Enter expiry as MM/YY.</div>
+              </div>
+              <div class="field">
+                <label for="card-cvv">CVV</label>
+                <input type="password" id="card-cvv" placeholder="123" maxlength="3">
+                <div class="error">Enter a 3-digit CVV.</div>
+              </div>
+            </div>
+          </div>
+          <div id="netbanking-fields" style="display:none">
+            <div class="field">
+              <label for="bank">Select your bank</label>
+              <select id="bank">
+                <option value="">Choose a bank</option>
+                <option>State Bank of India</option>
+                <option>HDFC Bank</option>
+                <option>ICICI Bank</option>
+                <option>Axis Bank</option>
+                <option>Punjab National Bank</option>
+              </select>
+              <div class="error">Select a bank to continue.</div>
+            </div>
+          </div>
+
+          <p class="hint" style="margin-bottom:16px">🔒 This is a simulated, secure-looking checkout for demo purposes. No real payment is processed and no real card/UPI details are stored.</p>
+          <button type="submit" class="btn btn-primary btn-block" id="pay-btn">Pay Now</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+APR.requireAuth();
+const session = APR.getSession();
+const draft = JSON.parse(sessionStorage.getItem('apr-recharge-draft') || 'null');
+if(!draft || !draft.operator){ window.location.href = 'recharge.html'; }
+
+const plan = draft.planId ? APR.plans.find(p => p.id === draft.planId) : null;
+const amount = plan ? plan.amount : Number(draft.amount || 0);
+const operatorMeta = Object.fromEntries(APR.operators.map(o => [o.id, o]));
+
+document.getElementById('summary-card').innerHTML = `
+  <h3 style="margin-bottom:16px">Order summary</h3>
+  <div class="flex-between"><span class="muted">Customer</span><strong>${session.name}</strong></div>
+  <div class="divider"></div>
+  <div class="flex-between"><span class="muted">Mobile number</span><strong>${draft.mobile || session.mobile}</strong></div>
+  <div class="flex-between" style="margin-top:8px"><span class="muted">Operator</span><strong style="text-transform:capitalize">${operatorMeta[draft.operator].name}</strong></div>
+  <div class="flex-between" style="margin-top:8px"><span class="muted">Plan</span><strong>${plan ? (plan.validity + ' · ' + plan.data) : 'Custom top-up'}</strong></div>
+  <div class="divider"></div>
+  <div class="flex-between"><span>Total amount</span><span class="plan-price">₹${amount}</span></div>
+`;
+
+const methodSelect = document.getElementById('method');
+const groups = { upi: document.getElementById('upi-fields'), card: document.getElementById('card-fields'), netbanking: document.getElementById('netbanking-fields') };
+methodSelect.addEventListener('change', () => {
+  Object.values(groups).forEach(g => g.style.display = 'none');
+  groups[methodSelect.value].style.display = 'block';
+});
+
+document.getElementById('pay-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const method = methodSelect.value;
+  let ok = true;
+
+  if(method === 'upi'){
+    const field = document.getElementById('upi-id').closest('.field');
+    if(!/^[\w.\-]+@[\w]+$/.test(document.getElementById('upi-id').value.trim())){ APR.showError(field, field.querySelector('.error').textContent); ok = false; } else APR.clearError(field);
+  } else if(method === 'card'){
+    const numField = document.getElementById('card-number').closest('.field');
+    const expField = document.getElementById('card-expiry').closest('.field');
+    const cvvField = document.getElementById('card-cvv').closest('.field');
+    const digits = document.getElementById('card-number').value.replace(/\s/g,'');
+    if(!/^\d{16}$/.test(digits)){ APR.showError(numField, numField.querySelector('.error').textContent); ok = false; } else APR.clearError(numField);
+    if(!/^\d{2}\/\d{2}$/.test(document.getElementById('card-expiry').value.trim())){ APR.showError(expField, expField.querySelector('.error').textContent); ok = false; } else APR.clearError(expField);
+    if(!/^\d{3}$/.test(document.getElementById('card-cvv').value.trim())){ APR.showError(cvvField, cvvField.querySelector('.error').textContent); ok = false; } else APR.clearError(cvvField);
+  } else if(method === 'netbanking'){
+    const field = document.getElementById('bank').closest('.field');
+    if(!document.getElementById('bank').value){ APR.showError(field, field.querySelector('.error').textContent); ok = false; } else APR.clearError(field);
+  }
+  if(!ok) return;
+
+  const payBtn = document.getElementById('pay-btn');
+  payBtn.disabled = true;
+  payBtn.textContent = 'Processing payment…';
+
+  setTimeout(() => {
+    const success = Math.random() > 0.12; // demo: ~88% success rate
+    const txn = {
+      id: 'APR' + Date.now(),
+      user: session.username,
+      mobile: draft.mobile || session.mobile,
+      operator: draft.operator,
+      plan: plan ? (plan.validity + ' · ' + plan.data) : 'Custom top-up',
+      amount: amount,
+      method: method === 'upi' ? 'UPI' : method === 'card' ? 'Card' : 'Net Banking',
+      status: success ? 'Successful' : 'Failed',
+      date: new Date().toISOString()
+    };
+    const txns = APR.getTxns();
+    txns.push(txn);
+    APR.saveTxns(txns);
+    sessionStorage.removeItem('apr-recharge-draft');
+    window.location.href = 'payment-success.html?txn=' + txn.id;
+  }, 1400);
+});
+</script>
+</body>
+</html>

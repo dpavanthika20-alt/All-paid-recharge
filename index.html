@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All Paid Recharge — Fast. Simple. Secure. Recharge.</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li data-auth="in"><a href="transactions.html">Transactions</a></li>
+      <li data-auth="in"><a href="account.html">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="login.html" class="btn btn-ghost" data-auth="out" style="color:var(--text-on-dark-muted)">Log in</a>
+      <a href="register.html" class="btn btn-primary btn-sm" data-auth="out">Sign up</a>
+      <a href="dashboard.html" class="btn btn-outline btn-sm" data-auth="in" style="border-color:var(--line-dark);color:var(--text-on-dark)">Dashboard</a>
+      <a href="#" class="btn btn-ghost" data-auth="in" data-action="logout" style="color:var(--text-on-dark-muted)">Log out</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--lime)">MOBILE RECHARGE, HANDLED</div>
+    <h1>Recharge your mobile anytime, anywhere</h1>
+    <p>One place for Jio, Airtel, BSNL and Vi top-ups — pick a number, pick a plan, pay in seconds. A demo simulation, built to feel like the real thing.</p>
+
+    <div class="recharge-box">
+      <form class="grid grid-4" id="quick-recharge-form" novalidate>
+        <div class="field mt-0">
+          <label for="qr-mobile">Mobile number</label>
+          <input type="tel" id="qr-mobile" placeholder="98765 43210" maxlength="10">
+          <div class="error">Enter a valid 10-digit mobile number.</div>
+        </div>
+        <div class="field mt-0">
+          <label for="qr-operator">Operator</label>
+          <select id="qr-operator">
+            <option value="">Select operator</option>
+            <option value="jio">Jio</option>
+            <option value="airtel">Airtel</option>
+            <option value="bsnl">BSNL</option>
+            <option value="vi">Vi</option>
+          </select>
+        </div>
+        <div class="field mt-0">
+          <label for="qr-amount">Amount (optional)</label>
+          <input type="number" id="qr-amount" placeholder="₹299">
+        </div>
+        <button type="submit" class="btn btn-primary" style="height:44px;align-self:end">View plans</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="wrap">
+    <div class="flex-between">
+      <h2>Recharge any network</h2>
+      <a href="plans.html" class="btn btn-outline btn-sm">Browse all plans</a>
+    </div>
+    <div class="grid grid-4" style="margin-top:20px">
+      <a href="plans.html?operator=jio" class="card card-hover operator-card"><div class="operator-mark op-jio">Jio</div><strong>Jio</strong><p class="muted" style="margin-top:6px">Data-first plans</p></a>
+      <a href="plans.html?operator=airtel" class="card card-hover operator-card"><div class="operator-mark op-airtel">A</div><strong>Airtel</strong><p class="muted" style="margin-top:6px">Reliable network</p></a>
+      <a href="plans.html?operator=bsnl" class="card card-hover operator-card"><div class="operator-mark op-bsnl">B</div><strong>BSNL</strong><p class="muted" style="margin-top:6px">Budget combos</p></a>
+      <a href="plans.html?operator=vi" class="card card-hover operator-card"><div class="operator-mark op-vi">Vi</div><strong>Vi</strong><p class="muted" style="margin-top:6px">Long validity</p></a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tight" style="background:var(--paper-raised);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap grid grid-3">
+    <div>
+      <h3 style="font-size:1.05rem">1. Enter your number</h3>
+      <p>Type your mobile number and choose your operator.</p>
+    </div>
+    <div>
+      <h3 style="font-size:1.05rem">2. Pick a plan</h3>
+      <p>Compare data, calling and validity, then choose what fits.</p>
+    </div>
+    <div>
+      <h3 style="font-size:1.05rem">3. Pay securely</h3>
+      <p>UPI, card or net banking — simulated for this demo, no real charges.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap center">
+    <h2>Ready to recharge?</h2>
+    <p style="max-width:46ch;margin-left:auto;margin-right:auto">Create a free account to save numbers, track transactions and recharge faster next time.</p>
+    <a href="register.html" class="btn btn-primary">Create your account</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div>© 2026 All Paid Recharge — demo project. Fast. Simple. Secure. Recharge.</div>
+    <span class="demo-flag">● Demo / Simulation only</span>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+<script>
+document.getElementById('quick-recharge-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const mobileField = document.getElementById('qr-mobile').closest('.field');
+  const mobile = document.getElementById('qr-mobile').value;
+  const operator = document.getElementById('qr-operator').value;
+  const amount = document.getElementById('qr-amount').value;
+  if(!APR.isMobile(mobile)){ APR.showError(mobileField, 'Enter a valid 10-digit mobile number.'); return; }
+  APR.clearError(mobileField);
+  sessionStorage.setItem('apr-recharge-draft', JSON.stringify({ mobile, operator, amount }));
+  window.location.href = 'plans.html' + (operator ? ('?operator=' + operator) : '');
+});
+</script>
+</body>
+</html>

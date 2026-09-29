@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help & Support — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li data-auth="in"><a href="transactions.html">Transactions</a></li>
+      <li data-auth="in"><a href="account.html">Account</a></li>
+      <li><a href="help.html" class="active">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="login.html" class="btn btn-ghost" data-auth="out" style="color:var(--text-on-dark-muted)">Log in</a>
+      <a href="dashboard.html" class="btn btn-outline btn-sm" data-auth="in" style="border-color:var(--line-dark);color:var(--text-on-dark)">Dashboard</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="wrap" style="max-width:760px">
+    <h2>Help & support</h2>
+    <p>Answers to common questions about this demo platform.</p>
+
+    <details class="accordion-item" open>
+      <summary>Is this a real recharge service?</summary>
+      <p>No. All Paid Recharge is a student/portfolio demo. Recharges, payments and transaction IDs are simulated — no real telecom operator is contacted and no money moves.</p>
+    </details>
+    <details class="accordion-item">
+      <summary>Where is my data stored?</summary>
+      <p>Your account, plans and transaction history are stored only in your browser's local storage for this demo. Clearing your browser data will remove them.</p>
+    </details>
+    <details class="accordion-item">
+      <summary>Why did my demo payment fail?</summary>
+      <p>The payment simulation randomly marks a small share of transactions as failed to show what a failed-payment flow looks like. No real charge was ever attempted.</p>
+    </details>
+    <details class="accordion-item">
+      <summary>Can I use my real card or UPI ID?</summary>
+      <p>Please don't enter real financial details. This form never transmits data anywhere — use any demo values, like 4111 1111 1111 1111 for a card number.</p>
+    </details>
+    <details class="accordion-item">
+      <summary>How do I reset my demo account?</summary>
+      <p>Open your browser's developer tools, clear local storage for this site, and refresh — a fresh demo account will be seeded automatically.</p>
+    </details>
+
+    <div class="card" style="margin-top:36px">
+      <h3>Still have a question?</h3>
+      <form id="contact-form" novalidate>
+        <div class="grid grid-2">
+          <div class="field">
+            <label for="c-name">Name</label>
+            <input type="text" id="c-name">
+          </div>
+          <div class="field">
+            <label for="c-email">Email</label>
+            <input type="email" id="c-email">
+            <div class="error">Enter a valid email address.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="c-message">Message</label>
+          <textarea id="c-message" rows="4"></textarea>
+          <div class="error">Tell us a little about your question.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Send message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+document.getElementById('contact-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const emailField = document.getElementById('c-email').closest('.field');
+  const msgField = document.getElementById('c-message').closest('.field');
+  let ok = true;
+  if(!APR.isEmail(document.getElementById('c-email').value)){ APR.showError(emailField, 'Enter a valid email address.'); ok = false; } else APR.clearError(emailField);
+  if(document.getElementById('c-message').value.trim().length < 5){ APR.showError(msgField, 'Tell us a little about your question.'); ok = false; } else APR.clearError(msgField);
+  if(!ok) return;
+  APR.toast('Message sent (demo only — no ticket is actually created).');
+  this.reset();
+});
+</script>
+</body>
+</html>

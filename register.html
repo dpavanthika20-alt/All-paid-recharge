@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create account — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="help.html">Help</a></li></ul>
+    <div class="nav-actions"><button class="theme-toggle" aria-label="Toggle dark mode">☾</button></div>
+  </div>
+</nav>
+
+<div class="auth-shell">
+  <div class="auth-card" style="max-width:460px">
+    <div class="card">
+      <h2>Create your account</h2>
+      <p>Takes less than a minute — all data stays in this browser for the demo.</p>
+
+      <form id="register-form" novalidate>
+        <div class="field">
+          <label for="fullname">Full name</label>
+          <input type="text" id="fullname" autocomplete="name">
+          <div class="error">Enter your full name.</div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label for="mobile">Mobile number</label>
+            <input type="tel" id="mobile" maxlength="10" autocomplete="tel">
+            <div class="error">Enter a valid 10-digit mobile number.</div>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="email">
+            <div class="error">Enter a valid email address.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="reg-username">Username</label>
+          <input type="text" id="reg-username" autocomplete="username">
+          <div class="error">Choose a username (min 3 characters).</div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" autocomplete="new-password">
+            <div class="error">Min 8 characters.</div>
+          </div>
+          <div class="field">
+            <label for="confirm-password">Confirm password</label>
+            <input type="password" id="confirm-password" autocomplete="new-password">
+            <div class="error">Passwords do not match.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="checkbox-row"><input type="checkbox" id="terms"> I agree to the Terms & Conditions and Privacy Policy.</label>
+          <div class="error">You must accept the terms to continue.</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Register</button>
+      </form>
+    </div>
+    <p class="auth-switch">Already have an account? <a href="login.html">Log in</a></p>
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+document.getElementById('register-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const f = {
+    fullname: document.getElementById('fullname'),
+    mobile: document.getElementById('mobile'),
+    email: document.getElementById('email'),
+    username: document.getElementById('reg-username'),
+    password: document.getElementById('reg-password'),
+    confirm: document.getElementById('confirm-password'),
+    terms: document.getElementById('terms')
+  };
+  let ok = true;
+  const check = (el, valid) => {
+    const field = el.closest('.field');
+    if(valid) APR.clearError(field); else { APR.showError(field, field.querySelector('.error').textContent); ok = false; }
+  };
+  check(f.fullname, f.fullname.value.trim().length > 1);
+  check(f.mobile, APR.isMobile(f.mobile.value));
+  check(f.email, APR.isEmail(f.email.value));
+  check(f.username, f.username.value.trim().length >= 3);
+  check(f.password, f.password.value.length >= 8);
+  check(f.confirm, f.confirm.value === f.password.value && f.confirm.value.length > 0);
+  check(f.terms, f.terms.checked);
+  if(!ok) return;
+
+  const users = APR.getUsers();
+  if(users.some(u => u.username === f.username.value.trim())){
+    APR.showError(f.username.closest('.field'), 'That username is already taken.');
+    return;
+  }
+  const newUser = {
+    name: f.fullname.value.trim(), mobile: f.mobile.value.trim(), email: f.email.value.trim(),
+    username: f.username.value.trim(), password: f.password.value, createdAt: new Date().toISOString().slice(0,10)
+  };
+  users.push(newUser);
+  APR.saveUsers(users);
+  APR.setSession({ name: newUser.name, username: newUser.username, email: newUser.email, mobile: newUser.mobile, createdAt: newUser.createdAt });
+  APR.toast('Account created — welcome, ' + newUser.name + '!');
+  window.location.href = 'dashboard.html';
+});
+</script>
+</body>
+</html>

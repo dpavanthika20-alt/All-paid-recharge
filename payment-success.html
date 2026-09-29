@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment Result — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li data-auth="in"><a href="transactions.html">Transactions</a></li>
+      <li data-auth="in"><a href="account.html">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="dashboard.html" class="btn btn-outline btn-sm" data-auth="in" style="border-color:var(--line-dark);color:var(--text-on-dark)">Dashboard</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="wrap" style="max-width:560px">
+    <div class="card center" id="result-card"></div>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+APR.requireAuth();
+const params = new URLSearchParams(location.search);
+const txn = APR.getTxns().find(t => t.id === params.get('txn'));
+const card = document.getElementById('result-card');
+
+if(!txn){
+  card.innerHTML = `<div class="empty-state"><div class="icon">❓</div>We couldn't find that transaction.<br><a href="dashboard.html" class="btn btn-outline btn-sm" style="margin-top:14px">Back to dashboard</a></div>`;
+} else {
+  const isSuccess = txn.status === 'Successful';
+  card.innerHTML = `
+    <div style="font-size:3rem;margin-bottom:8px">${isSuccess ? '✅' : '❌'}</div>
+    <h2 style="color:${isSuccess ? '#0d9488' : '#d1293e'}">${isSuccess ? 'Payment Successful' : 'Payment Failed'}</h2>
+    <p>${isSuccess ? 'Your recharge has been processed for this demo.' : 'The simulated payment could not be completed. No amount was deducted.'}</p>
+    <div class="divider"></div>
+    <div style="text-align:left">
+      <div class="flex-between"><span class="muted">Transaction ID</span><strong>${txn.id}</strong></div>
+      <div class="flex-between" style="margin-top:8px"><span class="muted">Mobile number</span><strong>${txn.mobile}</strong></div>
+      <div class="flex-between" style="margin-top:8px"><span class="muted">Operator</span><strong style="text-transform:capitalize">${txn.operator}</strong></div>
+      <div class="flex-between" style="margin-top:8px"><span class="muted">Amount</span><strong>₹${txn.amount}</strong></div>
+      <div class="flex-between" style="margin-top:8px"><span class="muted">Date &amp; time</span><strong>${new Date(txn.date).toLocaleString()}</strong></div>
+      <div class="flex-between" style="margin-top:8px"><span class="muted">Status</span><span class="badge ${isSuccess ? 'badge-success' : 'badge-failed'}">${txn.status}</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid grid-2">
+      <a href="transactions.html" class="btn btn-outline">View history</a>
+      ${isSuccess ? '<a href="dashboard.html" class="btn btn-primary">Go to dashboard</a>' : '<a href="plans.html" class="btn btn-primary">Try again</a>'}
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

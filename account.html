@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Account — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li><a href="transactions.html">Transactions</a></li>
+      <li><a href="account.html" class="active">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="#" class="btn btn-ghost" data-action="logout" style="color:var(--text-on-dark-muted)">Log out</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<div class="app-shell">
+  <aside class="app-sidebar">
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="recharge.html">📱 New recharge</a>
+    <a href="plans.html">📶 Browse plans</a>
+    <a href="transactions.html">🧾 Transactions</a>
+    <a href="account.html" class="active">👤 Account</a>
+    <a href="help.html">💬 Help</a>
+  </aside>
+
+  <main class="app-main">
+    <h2>My account</h2>
+
+    <div class="card" style="margin-bottom:24px">
+      <div class="flex-between">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--lime),var(--teal));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;color:var(--lime-ink)" id="avatar-initial"></div>
+          <div>
+            <h3 style="margin-bottom:2px" data-user="name"></h3>
+            <p class="mt-0" id="member-since"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Personal information</h3>
+    <form id="profile-form" class="card" style="margin-bottom:24px">
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="p-name">Full name</label>
+          <input type="text" id="p-name">
+        </div>
+        <div class="field">
+          <label for="p-mobile">Mobile number</label>
+          <input type="tel" id="p-mobile" maxlength="10">
+          <div class="error">Enter a valid 10-digit mobile number.</div>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="p-email">Email</label>
+          <input type="email" id="p-email">
+          <div class="error">Enter a valid email address.</div>
+        </div>
+        <div class="field">
+          <label for="p-username">Username</label>
+          <input type="text" id="p-username" disabled>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-dark">Save changes</button>
+    </form>
+
+    <h3>Saved mobile numbers</h3>
+    <div class="card" id="saved-numbers" style="margin-bottom:24px"></div>
+
+    <h3>Security</h3>
+    <div class="card">
+      <p class="mt-0">Password last changed on account creation. For this demo, password changes are simulated only.</p>
+      <button class="btn btn-outline" id="change-pass-btn">Change password</button>
+    </div>
+  </main>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+APR.requireAuth();
+let session = APR.getSession();
+document.getElementById('avatar-initial').textContent = session.name.charAt(0).toUpperCase();
+document.getElementById('member-since').textContent = 'Member since ' + new Date(session.createdAt).toLocaleDateString();
+document.getElementById('p-name').value = session.name;
+document.getElementById('p-mobile').value = session.mobile;
+document.getElementById('p-email').value = session.email;
+document.getElementById('p-username').value = session.username;
+
+document.getElementById('saved-numbers').innerHTML = `
+  <div class="flex-between" style="padding:10px 0;border-bottom:1px solid var(--line)">
+    <div><strong>${session.mobile}</strong><div class="muted" style="font-size:.82rem">Primary number</div></div>
+    <span class="badge badge-success">Verified</span>
+  </div>
+  <p class="hint" style="margin-top:12px;margin-bottom:0">Additional saved numbers will appear here after you recharge them.</p>
+`;
+
+document.getElementById('profile-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const mobileField = document.getElementById('p-mobile').closest('.field');
+  const emailField = document.getElementById('p-email').closest('.field');
+  let ok = true;
+  if(!APR.isMobile(document.getElementById('p-mobile').value)){ APR.showError(mobileField, 'Enter a valid 10-digit mobile number.'); ok = false; } else APR.clearError(mobileField);
+  if(!APR.isEmail(document.getElementById('p-email').value)){ APR.showError(emailField, 'Enter a valid email address.'); ok = false; } else APR.clearError(emailField);
+  if(!ok) return;
+
+  const users = APR.getUsers().map(u => u.username === session.username
+    ? { ...u, name: document.getElementById('p-name').value.trim(), mobile: document.getElementById('p-mobile').value.trim(), email: document.getElementById('p-email').value.trim() }
+    : u);
+  APR.saveUsers(users);
+  session = { ...session, name: document.getElementById('p-name').value.trim(), mobile: document.getElementById('p-mobile').value.trim(), email: document.getElementById('p-email').value.trim() };
+  APR.setSession(session);
+  document.querySelector('[data-user="name"]').textContent = session.name;
+  APR.toast('Profile updated.');
+});
+
+document.getElementById('change-pass-btn').addEventListener('click', () => {
+  APR.toast('Password change is simulated in this demo project.');
+});
+</script>
+</body>
+</html>

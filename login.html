@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="help.html">Help</a></li></ul>
+    <div class="nav-actions"><button class="theme-toggle" aria-label="Toggle dark mode">☾</button></div>
+  </div>
+</nav>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="card">
+      <h2>Welcome back</h2>
+      <p>Log in to manage recharges and view your history.</p>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="username">Username or email</label>
+          <input type="text" id="username" autocomplete="username">
+          <div class="error">Enter your username or email.</div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <input type="password" id="password" autocomplete="current-password">
+            <button type="button" data-toggle-pass="password">Show</button>
+          </div>
+          <div class="error">Enter your password.</div>
+        </div>
+        <div class="flex-between" style="margin-bottom:20px">
+          <label class="checkbox-row"><input type="checkbox" id="remember"> Remember me</label>
+          <a href="#" style="font-size:.85rem;color:var(--teal);font-weight:600" id="forgot-link">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      </form>
+      <p class="hint center" style="margin-top:14px">Demo login — username <strong>demo</strong>, password <strong>demo1234</strong></p>
+    </div>
+    <p class="auth-switch">New here? <a href="register.html">Create an account</a></p>
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+<script>
+document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.togglePass);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Hide' : 'Show';
+  });
+});
+
+document.getElementById('forgot-link').addEventListener('click', (e) => {
+  e.preventDefault();
+  APR.toast('Password reset is simulated in this demo — use demo1234.', 'error');
+});
+
+document.getElementById('login-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const userField = document.getElementById('username').closest('.field');
+  const passField = document.getElementById('password').closest('.field');
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  let ok = true;
+  if(!username){ APR.showError(userField, 'Enter your username or email.'); ok = false; } else APR.clearError(userField);
+  if(!password){ APR.showError(passField, 'Enter your password.'); ok = false; } else APR.clearError(passField);
+  if(!ok) return;
+
+  const users = APR.getUsers();
+  const user = users.find(u => (u.username === username || u.email === username) && u.password === password);
+  if(!user){
+    APR.showError(passField, 'Incorrect username or password.');
+    return;
+  }
+  APR.setSession({ name: user.name, username: user.username, email: user.email, mobile: user.mobile, createdAt: user.createdAt });
+  APR.toast('Logged in as ' + user.name);
+  const params = new URLSearchParams(location.search);
+  window.location.href = params.get('next') || 'dashboard.html';
+});
+</script>
+</body>
+</html>

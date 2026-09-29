@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recharge — All Paid Recharge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a href="index.html" class="brand"><span class="brand-mark">AP</span>All Paid Recharge</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="recharge.html" class="active">Recharge</a></li>
+      <li><a href="plans.html">Plans</a></li>
+      <li data-auth="in"><a href="transactions.html">Transactions</a></li>
+      <li data-auth="in"><a href="account.html">Account</a></li>
+      <li><a href="help.html">Help</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" aria-label="Toggle dark mode">☾</button>
+      <a href="login.html" class="btn btn-ghost" data-auth="out" style="color:var(--text-on-dark-muted)">Log in</a>
+      <a href="dashboard.html" class="btn btn-outline btn-sm" data-auth="in" style="border-color:var(--line-dark);color:var(--text-on-dark)">Dashboard</a>
+      <button class="nav-toggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+<section class="section">
+  <div class="wrap" style="max-width:640px">
+    <div class="eyebrow">STEP 1 OF 3</div>
+    <h2>Start a recharge</h2>
+    <ul class="steps">
+      <li class="active">Details</li>
+      <li>Choose plan</li>
+      <li>Pay</li>
+    </ul>
+
+    <div class="card">
+      <form id="recharge-form" novalidate>
+        <div class="field">
+          <label for="mobile">Mobile number</label>
+          <input type="tel" id="mobile" maxlength="10" placeholder="98765 43210">
+          <div class="error">Enter a valid 10-digit mobile number.</div>
+        </div>
+        <div class="field">
+          <label for="operator">Operator</label>
+          <select id="operator">
+            <option value="">Select operator</option>
+            <option value="jio">Jio</option>
+            <option value="airtel">Airtel</option>
+            <option value="bsnl">BSNL</option>
+            <option value="vi">Vi</option>
+          </select>
+          <div class="error">Choose your operator.</div>
+        </div>
+        <div class="field">
+          <label for="amount">Preferred amount (optional)</label>
+          <input type="number" id="amount" placeholder="e.g. 299">
+          <div class="hint">Leave blank to browse all plans for this operator.</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">View plans</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script src="js/script.js"></script>
+<script>
+(function(){
+  const draft = JSON.parse(sessionStorage.getItem('apr-recharge-draft') || 'null');
+  if(draft){
+    if(draft.mobile) document.getElementById('mobile').value = draft.mobile;
+    if(draft.operator) document.getElementById('operator').value = draft.operator;
+    if(draft.amount) document.getElementById('amount').value = draft.amount;
+  }
+})();
+
+document.getElementById('recharge-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const mobileField = document.getElementById('mobile').closest('.field');
+  const operatorField = document.getElementById('operator').closest('.field');
+  const mobile = document.getElementById('mobile').value;
+  const operator = document.getElementById('operator').value;
+  const amount = document.getElementById('amount').value;
+  let ok = true;
+  if(!APR.isMobile(mobile)){ APR.showError(mobileField, 'Enter a valid 10-digit mobile number.'); ok = false; } else APR.clearError(mobileField);
+  if(!operator){ APR.showError(operatorField, 'Choose your operator.'); ok = false; } else APR.clearError(operatorField);
+  if(!ok) return;
+
+  sessionStorage.setItem('apr-recharge-draft', JSON.stringify({ mobile, operator, amount }));
+  window.location.href = 'plans.html?operator=' + operator + (amount ? ('&amount=' + amount) : '');
+});
+</script>
+</body>
+</html>
